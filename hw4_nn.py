@@ -64,7 +64,7 @@ class nn_convolutional_layer:
         # print ('out shape : ', out.shape)
 
         # return out (1,1,w_size, h_size, batch_size, num_filter) -> (w_size, h_size, batch_size, num_filter)
-        out = out.squeeze()
+        out = out.squeeze(axis=(0,1))
         # print('out shape after squeeze: ', out.shape)
 
         # for plus b -> b is just depend num_filter // 생각하기 쉽게 순서를 좀 바꿔주자
@@ -91,7 +91,7 @@ class nn_convolutional_layer:
         # dLdy padding
         # print ('input dLdy : ', dLdy.shape, '\n')
         # set padding size, only axis out_width and out_height
-        pad_size = self.filter_width - 1
+        pad_size = int(np.floor((self.filter_width +1) / 2))
         # pad only axis out_width and out_height with pad_size and value 0
         #       axis=0, axis=1, axis=2              , axis=3
         npad = ((0, 0), (0, 0), (pad_size, pad_size), (pad_size, pad_size))
@@ -116,7 +116,7 @@ class nn_convolutional_layer:
 
         # convolution dLdy * w_reverse.T
         dLdx = dLdy_view @ w_rev.T
-        dLdx = dLdx.squeeze()
+        dLdx = dLdx.squeeze(axis=(0,1))
         dLdx = dLdx.transpose(2,3,0,1)
         # print ('dLdx shape : ', dLdx.shape)
 
@@ -139,7 +139,7 @@ class nn_convolutional_layer:
         # print ('dLdy_flat shape : ', dLdy_flat.shape)
         dLdW = x_view @ dLdy_flat.T
         # print('dLdW shape :', dLdW.shape)
-        dLdW = dLdW.squeeze()
+        dLdW = dLdW.squeeze(axis=(0,1))
         dLdW = dLdW.transpose (3, 0, 1, 2)
         # print('dLdW shape :', dLdW.shape)
 
@@ -174,7 +174,7 @@ class nn_max_pooling_layer:
         y = view_as_windows(x, (x.shape[0], x.shape[1], self.pool_size, self.pool_size), self.stride)
         # y.shape = (1, 1, 16, 16, 8, 3, 2, 2)
         # print ('[mp F]y shape: ', y.shape)
-        y = y.squeeze()
+        y = y.squeeze(axis=(0,1))
         #[mp F]y shape after squeeze:  (16, 16, 8, 3, 2, 2)
         # print('[mp F]y shape after squeeze: ', y.shape)
         y = y.reshape(y.shape[0], y.shape[1], y.shape[2], y.shape[3], -1)
